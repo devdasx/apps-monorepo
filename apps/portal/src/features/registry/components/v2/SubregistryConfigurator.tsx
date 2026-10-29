@@ -29,6 +29,7 @@ import type { ResourceId } from '@/lib/resource/resourceId'
 import { resourceIdForName } from '@/lib/resource/resourceId'
 import { ensChain } from '@/lib/wagmi'
 import { verifyProxyContract } from '@/utils/blockExplorer/verifyProxyContract'
+import { UntrustedRegistryAlert } from './UntrustedRegistryWarning'
 
 const DEPLOY_SUBREGISTRY_TX_ID = 'tx-deploy-subregistry'
 const SET_REGISTRY_PARENT_TX_ID = 'tx-set-registry-parent'
@@ -60,9 +61,11 @@ export const getCustomRegistryAddressError = (value: string): string | null =>
     .otherwise(() => 'Enter a valid contract address.')
 
 const CustomRegistryAddressField = ({
+  name,
   value,
   onChange,
 }: {
+  readonly name: string
   readonly value: string
   readonly onChange: (value: string) => void
 }) => {
@@ -70,17 +73,26 @@ const CustomRegistryAddressField = ({
   const error = touched ? getCustomRegistryAddressError(value) : null
 
   return (
-    <div>
-      <Input
-        id="contract-address"
-        placeholder="Paste contract address"
-        value={value}
-        aria-invalid={error !== null}
-        className="w-full p-3 h-9 bg-background border border-border rounded-md"
-        onChange={(e) => onChange(e.target.value.trim())}
-        onBlur={() => setTouched(true)}
-      />
-      {error ? <p className="text-p mt-1.5 text-destructive">{error}</p> : null}
+    <div className="flex flex-col gap-5">
+      <div>
+        <Input
+          id="contract-address"
+          placeholder="Paste contract address"
+          value={value}
+          aria-invalid={error !== null}
+          className="w-full p-3 h-9 bg-background border border-border rounded-md"
+          onChange={(e) => onChange(e.target.value.trim())}
+          onBlur={() => setTouched(true)}
+        />
+        {error ? (
+          <p className="text-p mt-1.5 text-destructive">{error}</p>
+        ) : null}
+      </div>
+      {isAddress(value) ? (
+        <UntrustedRegistryAlert address={value}>
+          Deploy a new registry for {name} instead of pointing it at this one.
+        </UntrustedRegistryAlert>
+      ) : null}
     </div>
   )
 }
@@ -319,6 +331,7 @@ const SubregistryConfiguratorForm = ({
         </RadioGroup>
         {useCustomRegistry ? (
           <CustomRegistryAddressField
+            name={name}
             value={contractAddress}
             onChange={setContractAddress}
           />

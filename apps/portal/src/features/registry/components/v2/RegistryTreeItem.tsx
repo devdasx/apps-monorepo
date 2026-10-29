@@ -26,6 +26,7 @@ import { MigrateRegistryPrompt } from './MigrateRegistryPrompt'
 import { ReconfigureRegistryForm } from './ReconfigureRegistryForm'
 import { RegistryPanel } from './RegistryPanel'
 import { UnconfiguredRegistry } from './UnconfiguredRegistry'
+import { UntrustedRegistryBadge } from './UntrustedRegistryWarning'
 
 type RegistryTreeItemProps = {
   chainId: number
@@ -196,6 +197,7 @@ const RegistryContractRow = ({
     >
       {truncateAddress(address, 6, 4)}
     </EntityBadge>
+    {isDeployedRegistry ? <UntrustedRegistryBadge address={address} /> : null}
     {privilegeWarning}
     {showInlineMeta ? (
       <div className="flex flex-row items-center justify-start gap-2 px-1 lg:px-0 pb-2.5 lg:pb-0">
